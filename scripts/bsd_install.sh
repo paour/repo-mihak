@@ -22,7 +22,7 @@ get_freebsd_catalog() {
 
 # Function to process a package and its dependencies
 grep_package_in_catalog() {
-  package_name="$1"
+  local package_name="$1"
 
   # Skip processing if the package has already been handled
   echo "$processed_deps" | grep -qE "(^| )$package_name( |$)" && return 0
@@ -31,20 +31,20 @@ grep_package_in_catalog() {
   processed_deps="$processed_deps $package_name"
 
   # Check if the package is already in the repository
-  pkg search "$package_name" | grep -qE "^$package_name-" && return 0
+  pkg search "$package_name" | grep -qE "^$package_name-" && echo "Package $package_name already installed" #&& return 0
 
   # Retrieve package information from the local catalog
-  package_info=$(grep "\"name\":\"$package_name\"" "${tmp_dir}/packagesite.yaml")
+  local package_info=$(grep "\"name\":\"$package_name\"" "${tmp_dir}/packagesite.yaml")
   [ -z "$package_info" ] && echo "Package $package_name not found" && return 1
 
   # Extract and process dependencies
-  dependencies=$(echo "$package_info" | jq -r '.deps | keys[]' 2>/dev/null)
+  local dependencies=$(echo "$package_info" | jq -r '.deps | keys[]' 2>/dev/null)
   for dep in $dependencies; do
     grep_package_in_catalog "$dep"
   done
 
   # Construct the package URL
-  package_url="${repourl}/$(echo "$package_info" | jq -r '.repopath')"
+  local package_url="${repourl}/$(echo "$package_info" | jq -r '.repopath')"
 
   # Skip if the package URL has already been processed
   echo " $processed_urls " | grep -q " $package_url " && return 0
