@@ -31,7 +31,7 @@ grep_package_in_catalog() {
   processed_deps="$processed_deps $package_name"
 
   # Check if the package is already in the repository
-  pkg search "$package_name" | grep -qE "^$package_name-" && echo "Package $package_name already installed" #&& return 0
+  pkg info "$package_name" | grep -qE "^$package_name-" && echo "Package $package_name already installed" #&& return 0
 
   # Retrieve package information from the local catalog
   local package_info=$(grep "\"name\":\"$package_name\"" "${tmp_dir}/packagesite.yaml")
